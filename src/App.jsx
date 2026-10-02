@@ -18,15 +18,22 @@ const WINDOWS = [
 export default function App() {
   const [open, setOpen] = useState(() => new Set(WINDOWS.map((w) => w.id)))
   const [order, setOrder] = useState(WINDOWS.map((w) => w.id))
+  const [minimized, setMinimized] = useState(() => new Set())
   const [detail, setDetail] = useState(null)
   const [startOpen, setStartOpen] = useState(false)
   const music = useChiptune()
 
   const focus = (id) => setOrder((o) => [...o.filter((x) => x !== id), id])
   const z = (id) => 10 + order.indexOf(id)
-  const close = (id) => setOpen((s) => { const n = new Set(s); n.delete(id); return n })
+  const without = (set, id) => { const n = new Set(set); n.delete(id); return n }
+  const close = (id) => {
+    setOpen((s) => without(s, id))
+    setMinimized((s) => without(s, id))
+  }
+  const toggleMin = (id) => setMinimized((s) => (s.has(id) ? without(s, id) : new Set(s).add(id)))
   const show = (id) => {
     setOpen((s) => new Set(s).add(id))
+    setMinimized((s) => without(s, id))
     focus(id)
     setStartOpen(false)
     requestAnimationFrame(() =>
@@ -43,6 +50,8 @@ export default function App() {
           z={z(id)}
           onFocus={() => focus(id)}
           onClose={() => close(id)}
+          minimized={minimized.has(id)}
+          onToggleMin={() => toggleMin(id)}
           bodyClass={bodyClass}
         >
           {body}
@@ -164,13 +173,13 @@ export default function App() {
           <div className="startmenu">
             {WINDOWS.map((w) => (
               <button key={w.id} onClick={() => show(w.id)}>
-                {open.has(w.id) ? '▣' : '□'} {w.title}
+                {open.has(w.id) && !minimized.has(w.id) ? '▣' : '□'} {w.title}
               </button>
             ))}
           </div>
         )}
         <div className="taskbar__apps">
-          {WINDOWS.filter((w) => !open.has(w.id)).map((w) => (
+          {WINDOWS.filter((w) => !open.has(w.id) || minimized.has(w.id)).map((w) => (
             <button key={w.id} onClick={() => show(w.id)}>{w.title}</button>
           ))}
         </div>

@@ -105,7 +105,19 @@ a { color: inherit; }
   animation: pop .35s cubic-bezier(.3, 1.6, .5, 1) both;
 }
 @keyframes pop { from { opacity: 0; scale: .9; } }
-.win--max { position: fixed !important; inset: 56px 16px 64px; transform: none !important; }
+.win-slot { position: relative; min-width: 0; }
+.win--max {
+  position: fixed !important; inset: 52px 16px 56px; transform: none !important;
+  display: flex; flex-direction: column;
+  animation: none;
+}
+.win--max .win__bar { cursor: default; }
+.win--max .win__body { flex: 1; overflow: auto; overscroll-behavior: contain; }
+.win-backdrop {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(91, 95, 168, .3); backdrop-filter: blur(2px);
+}
+.win--min .win__bar { border-bottom: 0; cursor: pointer; }
 .win--floating { width: min(460px, calc(100vw - 32px)); }
 
 .win__bar {
@@ -113,7 +125,7 @@ a { color: inherit; }
   padding: 3px 6px 3px 10px;
   background: linear-gradient(90deg, var(--bar), var(--bar-2));
   border-bottom: 2.5px solid var(--ink);
-  cursor: grab; user-select: none; touch-action: none;
+  cursor: grab; user-select: none;
 }
 .win__bar:active { cursor: grabbing; }
 .win__title { font-family: var(--pixel); font-size: 15px; color: #fff; text-shadow: 1px 1px 0 var(--ink); }
@@ -128,6 +140,26 @@ a { color: inherit; }
 .win__btns button:active { transform: translate(1px, 1px); }
 .ico-max { width: 10px; height: 8px; border: 2px solid var(--ink); border-top-width: 3px; }
 .ico-min { width: 10px; height: 2px; background: var(--ink); margin-top: 6px; }
+.ico-unmin { width: 10px; height: 2px; background: var(--ink); margin-bottom: 6px; }
+.ico-restore {
+  position: relative; width: 8px; height: 7px; margin: 3px 0 0 -3px;
+  border: 2px solid var(--ink); border-top-width: 3px;
+}
+.ico-restore::before {
+  content: ''; position: absolute; top: -7px; left: 2px; width: 8px; height: 7px;
+  border: 2px solid var(--ink); border-top-width: 3px; border-left-width: 0; border-bottom-width: 0;
+}
+
+/* arrastar só no desktop com mouse — no celular a barra precisa deixar a página rolar */
+@media (min-width: 641px) and (hover: hover) {
+  .win__bar { touch-action: none; }
+}
+@media (max-width: 640px), (hover: none) {
+  .win__bar { cursor: default; padding-block: 5px; }
+  .win__btns { gap: 6px; }
+  .win__btns button { width: 30px; height: 28px; font-size: 15px; }
+  .win--max { inset: 46px 8px 52px; }
+}
 
 .win__body { padding: 16px 18px; }
 .win__body--flush { padding: 0; line-height: 0; }
